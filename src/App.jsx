@@ -216,7 +216,8 @@ function Subjects({ setActive }) {
 
 
 
-function Learning({ lesson, setActive })  if (!lesson) {
+function Learning({ lesson, setActive }) {
+  if (!lesson) {
     return (
       <section className="page-card">
         <h2>Select a lesson</h2>
@@ -541,3 +542,5 @@ function App() {
     </div>
   );
 
+}
+export default App;
