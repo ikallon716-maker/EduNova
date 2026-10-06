@@ -331,94 +331,322 @@ function AITutor() {
 }
 
 function Quizzes() {
-  const [started, setStarted] = useState(false);
+  const quizData = {
+    Mathematics: {
+      "Basic Arithmetic": [
+        {
+          question: "What is the value of 3 × 4?",
+          options: ["8", "10", "12", "14"],
+          answer: "12",
+        },
+        {
+          question: "What is 15 ÷ 3?",
+          options: ["3", "5", "6", "8"],
+          answer: "5",
+        },
+        {
+          question: "What is 7 + 8?",
+          options: ["13", "14", "15", "16"],
+          answer: "15",
+        },
+      ],
+      "Algebra Basics": [
+        {
+          question: "What is x if x + 5 = 12?",
+          options: ["5", "6", "7", "8"],
+          answer: "7",
+        },
+        {
+          question: "What is 2x if x = 4?",
+          options: ["4", "6", "8", "10"],
+          answer: "8",
+        },
+        {
+          question: "What is x if 3x = 15?",
+          options: ["3", "4", "5", "6"],
+          answer: "5",
+        },
+      ],
+    },
+
+    Chemistry: {
+      "Atomic Structure": [
+        {
+          question: "What is the chemical symbol for oxygen?",
+          options: ["O", "Ox", "C", "H"],
+          answer: "O",
+        },
+        {
+          question: "What is the chemical symbol for hydrogen?",
+          options: ["He", "H", "Hy", "Hg"],
+          answer: "H",
+        },
+        {
+          question: "Which particle has a negative charge?",
+          options: ["Proton", "Neutron", "Electron", "Nucleus"],
+          answer: "Electron",
+        },
+      ],
+      "Chemical Compounds": [
+        {
+          question: "What is H₂O commonly called?",
+          options: ["Oxygen", "Hydrogen", "Water", "Carbon dioxide"],
+          answer: "Water",
+        },
+        {
+          question: "What is the chemical formula for carbon dioxide?",
+          options: ["CO", "CO₂", "C₂O", "C₂O₂"],
+          answer: "CO₂",
+        },
+        {
+          question: "What is NaCl commonly called?",
+          options: ["Sugar", "Water", "Table salt", "Oxygen"],
+          answer: "Table salt",
+        },
+      ],
+    },
+
+    Physics: {
+      "Forces and Motion": [
+        {
+          question: "What is the SI unit of force?",
+          options: ["Joule", "Newton", "Watt", "Pascal"],
+          answer: "Newton",
+        },
+        {
+          question: "What is the SI unit of speed?",
+          options: ["Newton", "Joule", "m/s", "Watt"],
+          answer: "m/s",
+        },
+        {
+          question: "What instrument is used to measure temperature?",
+          options: ["Barometer", "Thermometer", "Ammeter", "Voltmeter"],
+          answer: "Thermometer",
+        },
+      ],
+      Energy: [
+        {
+          question: "What is the SI unit of energy?",
+          options: ["Newton", "Joule", "Watt", "Pascal"],
+          answer: "Joule",
+        },
+        {
+          question: "Which form of energy is stored in food?",
+          options: ["Chemical energy", "Sound energy", "Light energy", "Nuclear energy"],
+          answer: "Chemical energy",
+        },
+        {
+          question: "What is the approximate acceleration due to gravity on Earth?",
+          options: ["2.8 m/s²", "5.5 m/s²", "9.8 m/s²", "15.2 m/s²"],
+          answer: "9.8 m/s²",
+        },
+      ],
+    },
+  };
+
+  const [subject, setSubject] = useState("");
+  const [topic, setTopic] = useState("");
+  const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+  const [answered, setAnswered] = useState(false);
+  const [finished, setFinished] = useState(false);
 
-  const correctAnswer = "12";
-
-  if (!started) {
+  if (!subject) {
     return (
       <section className="page-card">
         <p className="eyebrow">PRACTICE</p>
-
-        <h2>Quizzes</h2>
-
+        <h2>Choose a Subject</h2>
         <p className="muted">
-          Test your understanding instead of just memorizing.
+          Select a subject to start your quiz.
         </p>
 
         <div className="quiz-list">
-          <div className="quiz-item">
-            <div>
-              <span>Mathematics</span>
-              <strong>Quick Quiz</strong>
-            </div>
+          {Object.keys(quizData).map((name) => (
+            <div className="quiz-item" key={name}>
+              <div>
+                <span>EduNova Quiz</span>
+                <strong>{name} · 3 Questions</strong>
+              </div>
 
-            <button
-              className="secondary"
-              onClick={() => setStarted(true)}
-            >
-              Start →
-            </button>
-          </div>
+              <button
+                className="secondary"
+                onClick={() => setSubject(name)}
+              >
+                Start →
+              </button>
+            </div>
+          ))}
         </div>
       </section>
     );
   }
 
+  if (!topic) {
+    const topics = Object.keys(quizData[subject]);
+
+    return (
+      <section className="page-card">
+        <p className="eyebrow">PRACTICE</p>
+        <h2>{subject} Topics</h2>
+        <p className="muted">
+          Choose a topic to start your quiz.
+        </p>
+
+        <div className="quiz-list">
+          {topics.map((name) => (
+            <div className="quiz-item" key={name}>
+              <div>
+                <span>{subject} Quiz</span>
+                <strong>{name} · 3 Questions</strong>
+              </div>
+
+              <button
+                className="secondary"
+                onClick={() => setTopic(name)}
+              >
+                Start →
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button
+          className="secondary"
+          onClick={() => setSubject("")}
+        >
+          ← Back to Subjects
+        </button>
+      </section>
+    );
+  }
+
+  const questions = quizData[subject][topic];
+  const quiz = questions[current];
+  const percentage = Math.round((score / questions.length) * 100);
+
+  if (finished) {
+    const passed = percentage >= 60;
+
+    return (
+      <section className="page-card">
+        <p className="eyebrow">RESULT</p>
+        <h2>{subject} Quiz Complete!</h2>
+
+        <div className="feature-card">
+          <h3>
+            Score: {score}/{questions.length}
+          </h3>
+
+          <h3>{percentage}%</h3>
+
+          <p className="muted">
+            {passed
+              ? "Great work! You passed this quiz."
+              : "Keep practicing. Review this topic and try again."}
+          </p>
+
+          <button
+            className="primary"
+            onClick={() => {
+              setSubject("");
+              setTopic("");
+              setCurrent(0);
+              setSelected("");
+              setScore(0);
+              setAnswered(false);
+              setFinished(false);
+            }}
+          >
+            Choose Another Subject
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  function submitAnswer() {
+    if (!selected || answered) return;
+
+    setAnswered(true);
+
+    if (selected === quiz.answer) {
+      setScore((previous) => previous + 1);
+    }
+  }
+
+  function nextQuestion() {
+    if (!answered) return;
+
+    if (current === questions.length - 1) {
+      setFinished(true);
+      return;
+    }
+
+    setCurrent((previous) => previous + 1);
+    setSelected("");
+    setAnswered(false);
+  }
+
+  const isCorrect = selected === quiz.answer;
+
   return (
     <section className="page-card">
-      <p className="eyebrow">MATHEMATICS QUIZ</p>
-
-      <h2>Question 1</h2>
-
-      <p>
-        What is the value of 3 × 4?
+      <p className="eyebrow">
+        {subject.toUpperCase()} · QUESTION {current + 1} OF {questions.length}
       </p>
 
-      <div className="quiz-options">
-        {["8", "10", "12", "14"].map((option) => (
+      <div className="feature-card">
+        <p className="muted">
+          Current score: {score}/{questions.length}
+        </p>
+      </div>
+
+      <h2>{quiz.question}</h2>
+
+      <div className="quiz-list">
+        {quiz.options.map((option) => (
           <button
             key={option}
             className={selected === option ? "primary" : "secondary"}
-            onClick={() => setSelected(option)}
+            onClick={() => !answered && setSelected(option)}
+            disabled={answered}
           >
             {option}
           </button>
         ))}
       </div>
 
-      <button
-        className="primary"
-        disabled={!selected}
-        onClick={() => setSubmitted(true)}
-      >
-        Submit Answer
-      </button>
+      {!answered ? (
+        <button
+          className="primary"
+          onClick={submitAnswer}
+          disabled={!selected}
+        >
+          Check Answer
+        </button>
+      ) : (
+        <>
+          <div className="feature-card">
+            <h3>{isCorrect ? "🎉 Correct!" : "❌ Not quite"}</h3>
 
-      {submitted && (
-        <div className="feature-card">
-          {selected === correctAnswer ? (
-            <>
-              <h3>🎉 Correct!</h3>
-              <p>Excellent work. 3 × 4 = 12.</p>
-            </>
-          ) : (
-            <>
-              <h3>Keep practicing.</h3>
-              <p>
-                The correct answer is 12. Don't worry — mistakes are
-                part of learning.
-              </p>
-            </>
-          )}
-        </div>
+            <p className="muted">
+              {isCorrect
+                ? "Excellent. You got this question right."
+                : `The correct answer is ${quiz.answer}.`}
+            </p>
+          </div>
+
+          <button className="primary" onClick={nextQuestion}>
+            {current === questions.length - 1
+              ? "See Final Result"
+              : "Next Question →"}
+          </button>
+        </>
       )}
     </section>
   );
 }
-
 function Progress() {
   return (
     <section className="page-card">
